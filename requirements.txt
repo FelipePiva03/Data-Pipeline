@@ -1,0 +1,22 @@
+# --- Core Data Tools ---
+pyspark
+pandas
+numpy
+requests>=2.27.0
+
+# --- Storage & Connection ---
+# Pinning s3fs to a modern version prevents it from looking for ancient, broken ones
+s3fs>=2023.1.0 
+boto3
+psycopg2-binary
+
+# --- DBT ---
+dbt-core==1.7.10
+dbt-postgres==1.7.10
+
+# --- Airflow (Client Only) ---
+# We don't need the full airflow server locally, just the library definitions
+# Using a constraint prevents it from downgrading everything else
+apache-airflow>=2.7.0
+apache-airflow-providers-postgres
+apache-airflow-providers-amazon

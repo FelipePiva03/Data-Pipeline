@@ -1,0 +1,90 @@
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    restart: always
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: "minio@1234!"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+  minio_mc:
+    image: minio/mc:latest
+    container_name: minio_mc
+    depends_on:
+      - minio
+    # Não usamos restart always aqui pois é um container de setup (roda e para)
+    entrypoint: /bin/sh -c
+    command: >
+      "
+      echo 'Aguardando MinIO iniciar...'
+      # Loop até o MinIO responder (mais seguro que sleep)
+      until mc alias set myminio http://minio:9000 minioadmin 'minio@1234!'; do
+        echo 'MinIO indisponível... tentando em 2s'
+        sleep 2
+      done
+      
+      echo 'Criando bucket landing...'
+      mc mb myminio/landing --ignore-existing
+      
+      echo 'Setup concluído.'
+      exit 0
+      "
+
+  postgres-airflow:
+    image: postgres:15
+    container_name: postgres-airflow
+    restart: always
+    environment:
+      POSTGRES_USER: post_aiflow
+      POSTGRES_PASSWORD: airflow_123
+      POSTGRES_DB: airflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  airflow:
+    build: .  # Procura o Dockerfile na mesma pasta deste arquivo
+    container_name: airflow
+    restart: always
+    environment:
+      # Conexão com o banco de metadados
+      AIRFLOW_CORE_SQL_ALCHEMY_CONN: postgresql+psycopg2://post_aiflow:airflow_123@postgres-airflow:5432/airflow
+      AIRFLOW_CORE_EXECUTOR: LocalExecutor
+      AIRFLOW_CORE_LOAD_EXAMPLES: 'false'
+      AIRFLOW_CORE_DAGS_ARE_PAUSED_AT_CREATION: 'true'
+      AIRFLOW_CORE_LOGGING_LEVEL: INFO
+      # Variáveis para PySpark
+      JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+      # Variáveis para Boto3/MinIO
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: "minio@1234!"
+      MINIO_ENDPOINT: http://minio:9000
+      # Variáveis para a camada Silver (Postgres)
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: dw
+      POSTGRES_HOST: postgres-airflow
+    depends_on:
+      - postgres-airflow
+      - minio
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mapeamento correto para a imagem oficial (/opt/airflow)
+      - ./dags:/opt/airflow/dags
+      - ./scripts:/opt/airflow/scripts
+      - ./dbt_project:/opt/airflow/dbt_project
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+    command: airflow standalone
+
+volumes:
+  postgres_data:
+  minio_data:
