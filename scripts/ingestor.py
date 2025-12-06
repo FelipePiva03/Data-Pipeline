@@ -93,7 +93,7 @@ class Ingestor():
         self.download_and_upload(trip_url, trip_s3_path)
 
         # 2. Ingestão da Tabela de Zonas (CSV) - Necessário para saber os bairros
-        zone_url = "https://d37ci6vzurychx.cloudfront.net/misc/taxi+_zone_lookup.csv"
+        zone_url = "https://d37ci6vzurychx.cloudfront.net/misc/taxi_zone_lookup.csv"
         zone_s3_path = "bronze/nyc_taxi/zones/taxi_zone_lookup.csv"
         
         self.download_and_upload(zone_url, zone_s3_path)

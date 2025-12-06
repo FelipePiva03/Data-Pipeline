@@ -84,7 +84,26 @@ services:
       - ./logs:/opt/airflow/logs
       - ./plugins:/opt/airflow/plugins
     command: airflow standalone
+    
+  spark-notebook:
+    image: jupyter/pyspark-notebook:python-3.10
+    container_name: spark_notebook
+    ports:
+      - "8888:8888"
+    environment:
+      - JUPYTER_TOKEN=easy # Senha fácil para acesso local
+      # Variáveis de ambiente iguais às do Airflow para facilitar
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=minio@1234!
+      - MINIO_ENDPOINT=http://minio:9000
+    volumes:
+      - ./notebooks:/home/jovyan/work  # Cria essa pasta localmente para salvar seus .ipynb
+      - ./scripts:/home/jovyan/scripts # Mapeia seus scripts para poder importar se quiser
+    depends_on:
+      - minio
 
 volumes:
   postgres_data:
   minio_data:
+
+## docker exec airflow cat /opt/airflow/standalone_admin_password.txt # Ver senha admin Airflow

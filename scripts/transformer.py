@@ -38,8 +38,6 @@ class Transformer():
         """Lê os dados de viagens e zonas da camada bronze."""
         self.logger.info(f"Iniciando leitura da camada bronze para {year}-{month}...")
         
-        # Ajuste o nome do bucket se necessário (landing vs ingestion-data-lake)
-        # Supondo que o Ingestor salvou em 'ingestion-data-lake' conforme seu último log
         trips_path = f"s3a://{self.bucket_name}/bronze/nyc_taxi/trips/{year}/{month}/"
         zones_path = f"s3a://{self.bucket_name}/bronze/nyc_taxi/zones/taxi_zone_lookup.csv"
         
