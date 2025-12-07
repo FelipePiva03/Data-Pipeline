@@ -63,6 +63,6 @@ O ambiente é definido no arquivo `docker-compose.yml` e consiste nos seguintes 
 
 O pipeline foi desenhado para executar as seguintes etapas:
 
-1.  **Ingestão (Extract)**: Uma DAG no Airflow aciona o script `scripts/ingest.py`. Este script baixa dados de uma fonte externa (ex: NYC Taxi Data) e os armazena no bucket `landing` do MinIO.
+1.  **Ingestão (Extract)**: Uma DAG no Airflow aciona o script `scripts/ingest.py`. Este script baixa dados de uma fonte externa (ex: NYC Taxi Data) e os armazena no bucket `ingestion-data-lake` do MinIO.
 2.  **Processamento (Transform)**: Outra DAG utiliza PySpark para ler os dados brutos do Data Lake, realizar limpezas, agregações e outras transformações. O resultado é salvo em uma camada processada (ex: `processed`) no Data Lake.
 3.  **Carregamento e Modelagem (Load & Transform)**: Uma DAG final orquestra a execução de modelos dbt. O dbt lê os dados da camada processada, aplica a lógica de modelagem de negócios e materializa as tabelas finais em um Data Warehouse (que poderia ser o próprio Postgres ou outro banco de dados).
