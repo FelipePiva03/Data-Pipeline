@@ -1,0 +1,26 @@
+# dbt Profile Configuration for NYC Taxi Pipeline
+
+nyc_taxi:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('NYC_POSTGRES_HOST', 'postgres-nyc-taxi') }}"
+      port: "{{ env_var('NYC_POSTGRES_PORT', '5432') | int }}"
+      user: "{{ env_var('NYC_POSTGRES_USER', 'nyc_user') }}"
+      password: "{{ env_var('NYC_POSTGRES_PASSWORD', 'nyc_pass_123') }}"
+      dbname: "{{ env_var('NYC_POSTGRES_DB', 'nyc_taxi_db') }}"
+      schema: public
+      threads: 4
+      keepalives_idle: 0
+
+    prod:
+      type: postgres
+      host: "{{ env_var('NYC_POSTGRES_HOST', 'postgres-nyc-taxi') }}"
+      port: "{{ env_var('NYC_POSTGRES_PORT', '5432') | int }}"
+      user: "{{ env_var('NYC_POSTGRES_USER', 'nyc_user') }}"
+      password: "{{ env_var('NYC_POSTGRES_PASSWORD', 'nyc_pass_123') }}"
+      dbname: "{{ env_var('NYC_POSTGRES_DB', 'nyc_taxi_db') }}"
+      schema: public
+      threads: 8
+      keepalives_idle: 0

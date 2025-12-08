@@ -1,0 +1,50 @@
+# NYC Taxi Data Pipeline - dbt Project Configuration
+
+name: 'nyc_taxi_pipeline'
+version: '1.0.0'
+config-version: 2
+
+# Project profile (defined in profiles.yml)
+profile: 'nyc_taxi'
+
+# Directories
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Model configurations
+models:
+  nyc_taxi_pipeline:
+    # Bronze layer (staging models)
+    staging:
+      +materialized: view
+      +schema: staging
+
+    # Silver layer (cleaned and enriched)
+    silver:
+      +materialized: table
+      +schema: silver
+
+    # Gold layer (aggregated/marts)
+    gold:
+      +materialized: table
+      +schema: gold
+
+# Seeds configuration
+seeds:
+  nyc_taxi_pipeline:
+    +schema: raw
+
+# Documentation
+vars:
+  # Project variables
+  start_date: '2024-01-01'
+  end_date: '2024-12-31'

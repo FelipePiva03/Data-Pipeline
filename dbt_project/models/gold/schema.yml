@@ -1,0 +1,72 @@
+version: 2
+
+models:
+  - name: daily_trip_stats
+    description: "Daily aggregated trip statistics by pickup and dropoff borough"
+    columns:
+      - name: trip_date
+        description: "Date of the trips"
+        tests:
+          - not_null
+
+      - name: pickup_borough
+        description: "Borough where trips started"
+
+      - name: dropoff_borough
+        description: "Borough where trips ended"
+
+      - name: total_trips
+        description: "Total number of trips for this date and borough combination"
+        tests:
+          - not_null
+
+      - name: total_distance
+        description: "Total distance traveled in miles"
+
+      - name: avg_trip_distance
+        description: "Average trip distance in miles"
+
+      - name: total_revenue
+        description: "Total revenue from all trips"
+
+      - name: avg_fare_amount
+        description: "Average fare amount"
+
+      - name: avg_tip_amount
+        description: "Average tip amount"
+
+      - name: total_tips
+        description: "Total tips received"
+
+      - name: avg_passengers
+        description: "Average number of passengers per trip"
+
+      - name: credit_card_trips
+        description: "Number of trips paid with credit card"
+
+      - name: cash_trips
+        description: "Number of trips paid with cash"
+
+  - name: hourly_demand_patterns
+    description: "Trip demand patterns by hour of day and day of week"
+    columns:
+      - name: pickup_borough
+        description: "Borough where trips started"
+
+      - name: hour_of_day
+        description: "Hour of the day (0-23)"
+
+      - name: day_of_week
+        description: "Day of the week (0=Sunday, 6=Saturday)"
+
+      - name: total_trips
+        description: "Total number of trips for this time pattern"
+
+      - name: avg_distance
+        description: "Average trip distance"
+
+      - name: avg_fare
+        description: "Average fare amount"
+
+      - name: avg_duration_minutes
+        description: "Average trip duration in minutes"

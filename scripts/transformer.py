@@ -28,11 +28,11 @@ class Transformer():
         self.logger = logger
         
         # Detalhes da conexão com o Postgres
-        self.postgres_db = os.getenv("POSTGRES_DB", "nyc_taxi_db") 
-        self.postgres_user = os.getenv("POSTGRES_USER", "post_aiflow")
-        self.postgres_password = os.getenv("POSTGRES_PASSWORD", "airflow_123")
-        self.postgres_host = os.getenv("POSTGRES_HOST", "postgres-airflow") 
-        self.postgres_port = os.getenv("POSTGRES_PORT", "5432")
+        self.postgres_db = os.getenv("NYC_POSTGRES_DB", "nyc_taxi_db")
+        self.postgres_user = os.getenv("NYC_POSTGRES_USER", "nyc_user")
+        self.postgres_password = os.getenv("NYC_POSTGRES_PASSWORD", "nyc_pass_123")
+        self.postgres_host = os.getenv("NYC_POSTGRES_HOST", "postgres-nyc-taxi")
+        self.postgres_port = os.getenv("NYC_POSTGRES_PORT", "5432")
         
         self.postgres_url = f"jdbc:postgresql://{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
         self.postgres_properties = {

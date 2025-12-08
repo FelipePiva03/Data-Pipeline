@@ -33,18 +33,19 @@ secrets.yaml
 
 # Airflow
 logs/
+*.log
 airflow.db
 airflow.cfg
 unittests.cfg
 airflow-webserver.pid
 standalone_admin_password.txt
+webserver_config.py
 
 # Spark
 .ivy2/
 metastore_db/
 derby.log
 spark-warehouse/
-spark-jars/
 
 # DBT
 dbt_project/target/
@@ -58,4 +59,21 @@ desktop.ini
 
 # Jupyter
 .ipynb_checkpoints/
-*.ipynb
+
+# Data files (optional - uncomment if you don't want to track data files)
+# *.parquet
+# *.csv
+# *.json
+
+# Docker
+docker-compose.override.yml
+
+# Project specific
+dbt_project/target/
+dbt_project/dbt_modules/
+dbt_project/logs/
+
+# Temporary files
+*.tmp
+*.bak
+*~

@@ -49,6 +49,19 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  postgres-nyc-taxi:
+    image: postgres:15
+    container_name: postgres-nyc-taxi
+    restart: always
+    environment:
+      POSTGRES_USER: nyc_user
+      POSTGRES_PASSWORD: nyc_pass_123
+      POSTGRES_DB: nyc_taxi_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_nyc_data:/var/lib/postgresql/data
+
   airflow:
     build: .  # Procura o Dockerfile na mesma pasta deste arquivo
     container_name: airflow
@@ -64,13 +77,15 @@ services:
       AWS_ACCESS_KEY_ID: minioadmin
       AWS_SECRET_ACCESS_KEY: "minio@1234!"
       MINIO_ENDPOINT: http://minio:9000
-      # Variáveis para a camada Silver (Postgres)
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: dw
-      POSTGRES_HOST: postgres-airflow
+      # Variáveis para a camada Silver (NYC Taxi Postgres)
+      NYC_POSTGRES_USER: nyc_user
+      NYC_POSTGRES_PASSWORD: nyc_pass_123
+      NYC_POSTGRES_DB: nyc_taxi_db
+      NYC_POSTGRES_HOST: postgres-nyc-taxi
+      NYC_POSTGRES_PORT: 5432
     depends_on:
       - postgres-airflow
+      - postgres-nyc-taxi
       - minio
     ports:
       - "8080:8080"
@@ -85,8 +100,26 @@ services:
       - spark_ivy_cache:/home/airflow/.ivy2
     command: airflow standalone
 
+  streamlit:
+    build: ./streamlit_app
+    container_name: streamlit-dashboard
+    restart: always
+    environment:
+      NYC_POSTGRES_HOST: postgres-nyc-taxi
+      NYC_POSTGRES_PORT: 5432
+      NYC_POSTGRES_USER: nyc_user
+      NYC_POSTGRES_PASSWORD: nyc_pass_123
+      NYC_POSTGRES_DB: nyc_taxi_db
+    depends_on:
+      - postgres-nyc-taxi
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./streamlit_app:/app
+
 volumes:
   postgres_data:
+  postgres_nyc_data:
   minio_data:
   spark_ivy_cache:
 

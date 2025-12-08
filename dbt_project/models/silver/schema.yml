@@ -1,0 +1,64 @@
+version: 2
+
+models:
+  - name: nyc_trips_silver
+    description: "Silver layer table containing cleaned and enriched NYC Taxi trip data"
+    columns:
+      - name: trip_id
+        description: "Unique identifier for each trip record"
+        tests:
+          - unique
+          - not_null
+
+      - name: VendorID
+        description: "Taxi vendor identifier (1=Creative Mobile, 2=VeriFone)"
+
+      - name: tpep_pickup_datetime
+        description: "Date and time when the meter was engaged"
+        tests:
+          - not_null
+
+      - name: tpep_dropoff_datetime
+        description: "Date and time when the meter was disengaged"
+
+      - name: passenger_count
+        description: "Number of passengers in the vehicle"
+
+      - name: trip_distance
+        description: "Trip distance in miles"
+        tests:
+          - not_null
+
+      - name: total_amount
+        description: "Total amount charged to passengers"
+        tests:
+          - not_null
+
+      - name: pickup_borough
+        description: "Pickup location borough (enriched from zone lookup)"
+
+      - name: pickup_zone
+        description: "Pickup location zone name (enriched from zone lookup)"
+
+      - name: dropoff_borough
+        description: "Dropoff location borough (enriched from zone lookup)"
+
+      - name: dropoff_zone
+        description: "Dropoff location zone name (enriched from zone lookup)"
+
+      - name: processing_ts
+        description: "Timestamp when the record was processed by the transformation pipeline"
+
+      - name: partition_year
+        description: "Year extracted from pickup datetime, used for partitioning"
+
+      - name: partition_month
+        description: "Month extracted from pickup datetime, used for partitioning"
+
+      - name: created_at
+        description: "Timestamp when the record was created in the database"
+        tests:
+          - not_null
+
+      - name: updated_at
+        description: "Timestamp when the record was last updated"
