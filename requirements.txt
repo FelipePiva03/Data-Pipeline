@@ -3,6 +3,7 @@ pyspark
 pandas
 numpy
 requests>=2.27.0
+python-dotenv
 
 # --- Storage & Connection ---
 # Pinning s3fs to a modern version prevents it from looking for ancient, broken ones

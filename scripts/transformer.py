@@ -1,6 +1,13 @@
 import sys
 import os
-from pyspark.sql.functions import col, current_timestamp
+from pathlib import Path
+from pyspark.sql.functions import col, current_timestamp, broadcast, to_timestamp, year, month
+from pyspark.sql.types import TimestampType
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 try:
     from utils.logger import Logger
@@ -44,40 +51,79 @@ class Transformer():
         try:
             trips_df = self.spark_session.read.parquet(trips_path)
             # InferSchema=True no CSV é importante para pegar inteiros corretamente
-            zones_df = self.spark_session.read.option("header", "true").option("inferSchema", "true").csv(zones_path)
-            
+            # Adiciona charset UTF-8 explicitamente e ignora espaços em branco
+            zones_df = self.spark_session.read \
+                .option("header", "true") \
+                .option("inferSchema", "true") \
+                .option("encoding", "UTF-8") \
+                .option("ignoreLeadingWhiteSpace", "true") \
+                .option("ignoreTrailingWhiteSpace", "true") \
+                .csv(zones_path)
+
             self.logger.info(f"Leitura concluída. Viagens: {trips_df.count()} linhas.")
+            self.logger.info(f"Zonas - Colunas: {zones_df.columns}")
             return trips_df, zones_df
         except Exception as e:
             self.logger.error(f"Erro ao ler Bronze: {e}")
             raise
 
     def transform_data(self, trips_df, zones_df):
-        """Aplica transformações, joins e limpeza."""
-        self.logger.info("Iniciando transformação (Bronze -> Silver)...")
-        
-        # Join para adicionar informações de Pickup (Origem)
-        trips_with_pickup = trips_df.join(
-            zones_df.withColumnRenamed("LocationID", "PULocationID_join"),
-            trips_df.PULocationID == col("PULocationID_join"),
-            "left"
-        ).withColumnRenamed("Borough", "pickup_borough") \
-         .withColumnRenamed("Zone", "pickup_zone") \
-         .withColumnRenamed("service_zone", "pickup_service_zone") \
-         .drop("PULocationID_join")
+        """
+        Aplica limpeza, normalização e enriquecimento (Joins).
+        Transforma dados Bronze (Raw) em Silver (Refined).
+        """
+        self.logger.info("Iniciando transformações de negócio...")
 
-        # Join para adicionar informações de Dropoff (Destino)
-        transformed_df = trips_with_pickup.join(
-            zones_df.withColumnRenamed("LocationID", "DOLocationID_join"),
-            trips_with_pickup.DOLocationID == col("DOLocationID_join"),
-            "left"
-        ).withColumnRenamed("Borough", "dropoff_borough") \
-         .withColumnRenamed("Zone", "dropoff_zone") \
-         .withColumnRenamed("service_zone", "dropoff_service_zone") \
-         .drop("DOLocationID_join")
+        # 1. LIMPEZA E TIPAGEM (Data Quality)
+        # Garante que timestamps são do tipo correto e remove dados inválidos
+        clean_df = trips_df \
+            .withColumn("tpep_pickup_datetime", to_timestamp(col("tpep_pickup_datetime"))) \
+            .withColumn("tpep_dropoff_datetime", to_timestamp(col("tpep_dropoff_datetime"))) \
+            .filter(
+                (col("trip_distance") > 0) & 
+                (col("total_amount") > 0)
+            )
+
+        # 2. PREPARAÇÃO DAS ZONAS (Evitar ambiguidade de colunas)
+        # Selecionamos apenas o necessário e renomeamos antes do join
+        zones_pu = zones_df.select(
+            col("LocationID").alias("pu_loc_id"),
+            col("Borough").alias("pickup_borough"),
+            col("Zone").alias("pickup_zone"),
+            col("service_zone").alias("pickup_service_zone")
+        )
+
+        zones_do = zones_df.select(
+            col("LocationID").alias("do_loc_id"),
+            col("Borough").alias("dropoff_borough"),
+            col("Zone").alias("dropoff_zone"),
+            col("service_zone").alias("dropoff_service_zone")
+        )
+
+        # 3. JOINS COM BROADCAST (Enriquecimento)
         
-        # Timestamp de processamento
-        final_df = transformed_df.withColumn("processing_ts", current_timestamp())
+        # Join Pickup
+        df_joined_pu = clean_df.join(
+            broadcast(zones_pu),
+            clean_df.PULocationID == zones_pu.pu_loc_id,
+            "left"
+        ).drop("pu_loc_id") # Remove a chave duplicada do join
+
+        # Join Dropoff (usando o resultado do anterior)
+        final_df = df_joined_pu.join(
+            broadcast(zones_do),
+            df_joined_pu.DOLocationID == zones_do.do_loc_id,
+            "left"
+        ).drop("do_loc_id")
+
+        # 4. METADADOS E PARTICIONAMENTO
+        # Adiciona timestamp de processamento e colunas auxiliares para partição
+        final_df = final_df \
+            .withColumn("processing_ts", current_timestamp()) \
+            .withColumn("partition_year", year(col("tpep_pickup_datetime"))) \
+            .withColumn("partition_month", month(col("tpep_pickup_datetime")))
+
+        self.logger.info(f"Transformação concluída. Linhas resultantes: {final_df.count()}")
         
         return final_df
 

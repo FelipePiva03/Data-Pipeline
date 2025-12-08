@@ -1,7 +1,13 @@
 import requests
 import boto3
 import os
+from pathlib import Path
 from botocore.exceptions import ClientError
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 try:
     from utils.logger import Logger
@@ -21,9 +27,9 @@ class Ingestor():
 
     def __init__(self):
 
-        self.access_key = os.getenv("AWS_ACCESS_KEY_ID")
-        self.secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
-        self.endpoint = os.getenv("MINIO_ENDPOINT")
+        self.access_key = os.getenv("AWS_ACCESS_KEY_ID", "minioadmin")
+        self.secret_key = os.getenv("AWS_SECRET_ACCESS_KEY", "minio@1234!")
+        self.endpoint = os.getenv("MINIO_ENDPOINT", "http://localhost:9000")
         self.bucket_name = "ingestion-data-lake"
 
         self.s3_client = self._get_minio_client()
@@ -59,20 +65,22 @@ class Ingestor():
         Baixa o arquivo da URL via stream e envia para o MinIO sem carregar tudo na RAM.
         """
         logger.info(f"Iniciando download de: {url}")
-        
+
         try:
             # stream=True é essencial para arquivos grandes (Parquet)
+            # decode_content=True para descomprimir gzip automaticamente (importante para CSV)
             with requests.get(url, stream=True) as response:
                 response.raise_for_status() # Lança erro se a URL estiver quebrada (404, 500)
-                
+                response.raw.decode_content = True  # Descomprime gzip/deflate se necessário
+
                 logger.info(f"Enviando para MinIO em: {s3_path}")
                 self.s3_client.upload_fileobj(
-                    response.raw, 
-                    self.bucket_name, 
+                    response.raw,
+                    self.bucket_name,
                     s3_path
                 )
                 logger.info(f"Upload concluído: s3://{self.bucket_name}/{s3_path}")
-                
+
         except requests.exceptions.RequestException as e:
             logger.error(f"Erro de conexão ao baixar arquivo: {e}")
             raise
@@ -110,4 +118,3 @@ if __name__ == "__main__":
     
     ingestor = Ingestor()
     ingestor.run(year=args.year, month=args.month)
-    

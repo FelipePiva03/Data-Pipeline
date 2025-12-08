@@ -81,10 +81,13 @@ services:
       - ./dbt_project:/opt/airflow/dbt_project
       - ./logs:/opt/airflow/logs
       - ./plugins:/opt/airflow/plugins
+      - ./spark-jars:/opt/airflow/spark-jars
+      - spark_ivy_cache:/home/airflow/.ivy2
     command: airflow standalone
 
 volumes:
   postgres_data:
   minio_data:
+  spark_ivy_cache:
 
 ## docker exec airflow cat /opt/airflow/standalone_admin_password.txt # Ver senha admin Airflow
