@@ -46,6 +46,7 @@ webserver_config.py
 metastore_db/
 derby.log
 spark-warehouse/
+spark-jars/
 
 # DBT
 dbt_project/target/
