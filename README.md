@@ -383,55 +383,6 @@ ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
 \q
 ```
 
-## 🐛 Troubleshooting
-
-### Problemas Comuns
-
-**Container não inicia**
-```bash
-docker compose logs [service-name]
-docker compose restart [service-name]
-```
-
-**Sem espaço em disco**
-```bash
-docker system prune -a --volumes
-```
-
-**Airflow não acessível**
-```bash
-# Verificar se está rodando
-docker compose ps airflow
-
-# Ver logs
-docker compose logs -f airflow
-```
-
-**Tasks falhando com OutOfMemory**
-- Aumente memória do Docker (Settings → Resources)
-- Reduza `max_active_runs` na DAG
-
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Por favor, siga estas etapas:
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-### Guidelines
-
-- Siga PEP 8 para código Python
-- Adicione testes para novas funcionalidades
-- Atualize a documentação conforme necessário
-- Mantenha commits limpos e descritivos
-
-## 📄 Licença
-
-Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
-
 ## 👤 Autor
 
 **Felipe Piva**
@@ -439,13 +390,6 @@ Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICE
 - GitHub: [@FelipePiva03](https://github.com/FelipePiva03)
 - LinkedIn: [Felipe Piva](https://linkedin.com/in/felipe-piva-developer)
 - Email: felipepiva02@gmail.com
-
-## 🙏 Agradecimentos
-
-- [NYC Taxi & Limousine Commission](https://www.nyc.gov/site/tlc) pelos dados públicos
-- Comunidade Apache Airflow
-- Comunidade dbt
-- Todos os contribuidores do projeto
 
 ## 📚 Referências
 
