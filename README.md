@@ -5,7 +5,6 @@
 ![Spark](https://img.shields.io/badge/spark-3.5-orange)
 ![dbt](https://img.shields.io/badge/dbt-1.7-red)
 ![Docker](https://img.shields.io/badge/docker-compose-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
 
 Pipeline de dados completo de ponta a ponta para análise dos dados de táxi de NYC (New York City Taxi and Limousine Commission). Implementa a arquitetura Medallion (Bronze → Silver → Gold) orquestrada com Apache Airflow.
 
@@ -21,8 +20,6 @@ Pipeline de dados completo de ponta a ponta para análise dos dados de táxi de 
 - [Pipeline de Dados](#pipeline-de-dados)
 - [Comandos Úteis](#comandos-úteis)
 - [Dashboard](#dashboard)
-- [Contribuindo](#contribuindo)
-- [Licença](#licença)
 - [Autor](#autor)
 
 ## 🎯 Visão Geral
