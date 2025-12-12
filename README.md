@@ -1,4 +1,4 @@
-# 🚕 NYC Taxi Data Pipeline
+# NYC Taxi Data Pipeline
 
 ![Python](https://img.shields.io/badge/python-3.11-blue)
 ![Airflow](https://img.shields.io/badge/airflow-2.9.1-green)
